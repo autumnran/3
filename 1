@@ -1,0 +1,1089 @@
+7-1 列出连通集
+#include<bits/stdc++.h>
+
+using namespace std;
+
+vector<vector<int>>a;
+vector<bool>visited;
+
+
+void DFS(int v,vector<int>&component){
+    visited[v]=true;
+    component.push_back(v);
+
+    for(auto&u:a[v]){
+        if(!visited[u]){
+            DFS(u,component);
+        }
+    }
+
+}
+
+void BFS(int start,vector<int>&component){
+    queue<int>q;
+    visited[start]=true;
+
+    q.push(start);
+    while(!q.empty()){
+
+        int v=q.front();
+        q.pop();
+        component.push_back(v);
+        for(auto&u:a[v]){
+                if(!visited[u]){
+            visited[u]=true;
+            q.push(u);
+                }
+        }
+
+    }
+
+}
+
+void printC(vector<int>&component){
+    cout<<"{ ";
+    bool flag=true;
+    for(auto&u:component){
+        if(!flag)cout<<" ";
+        cout<<u;
+        flag=false;
+
+            }
+    cout<<" }"<<endl;
+
+}
+
+int main(){
+
+    int n,m;
+    cin>>n>>m;
+    //点，边
+    a.resize(n);
+    visited.resize(n,false);
+
+    for(int i=0;i<m;i++){
+        int u,v;
+        cin>>u>>v;
+        a[u].push_back(v);
+
+        a[v].push_back(u);
+    }
+
+    for(int i=0;i<n;i++){
+        sort(a[i].begin(),a[i].end());
+    }
+
+
+    for(int i=0;i<n;i++){
+        if(!visited[i]){
+            vector<int>component;
+            DFS(i,component);
+            printC(component);
+        }
+
+    }
+
+    fill(visited.begin(),visited.end(),false);
+
+    for(int i=0;i<n;i++){
+         if(!visited[i]){
+            vector<int>component;
+            BFS(i,component);
+            printC(component);
+        }
+
+
+    }
+
+
+    return 0;
+
+
+}
+7-2 哈利·波特的考试
+#include<bits/stdc++.h>
+using namespace std;
+
+const int INF=1e9;
+
+
+
+int main(){
+
+    int n,m;
+    cin>>n>>m;
+
+    vector<vector<int>>dist(n+1,vector<int>(n+1,INF));
+    /*
+
+     将上述一维向量复制 n+1 次，构成一个二维向量，
+     即 dist 是一个大小为 (n+1) × (n+1) 的矩阵。
+    */
+
+    for(int i=1;i<n;i++){
+        dist[i][i]=0;
+    }
+
+    for(int i=0;i<m;i++){
+        int u,v,length;
+        cin>>u>>v>>length;
+        dist[u][v]=length;
+        dist[v][u]=length;
+    }
+
+    for(int k=1;k<=n;k++){
+        for(int i=1;i<=n;i++){
+         for(int j=1;j<=n;j++){
+                if(dist[i][k]<INF&&dist[j][k]<INF){
+                dist[i][j]=min(dist[i][j],dist[i][k]+dist[j][k]);
+
+                }
+         }
+        }
+    }
+
+
+    int bestAnimal=0;
+    int minlongestPath=INF;
+
+    for(int i=1;i<=n;i++){
+        int longestPath=0;
+        bool reachable=true;
+        for(int j=1;j<=n;j++){
+
+            if(dist[i][j]==INF){
+                reachable=false;
+                break;
+            }
+            longestPath=max(longestPath,dist[i][j]);
+        }
+
+        if(reachable&&longestPath<minlongestPath){
+            minlongestPath=longestPath;
+            bestAnimal=i;
+
+        }
+    }
+
+    if(bestAnimal==0){
+        cout<<0<<endl;
+    }else{
+
+        cout<<bestAnimal<<" "<<minlongestPath<<endl;
+    }
+    return 0;
+
+}
+7-3 旅游规划
+#include <bits/stdc++.h>
+using namespace std;
+
+const int INF = 1e9;
+const int MAXN = 500;
+
+struct Edge {
+    int to, length, cost;
+};
+
+vector<Edge> adj[MAXN];
+int dist[MAXN], cost[MAXN];
+bool visited[MAXN];
+
+void dijkstra(int s, int n) {
+    fill(dist, dist + n, INF);
+    fill(cost, cost + n, INF);
+    fill(visited, visited + n, false);
+    dist[s] = 0;
+    cost[s] = 0;
+
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({0, s});
+
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+
+        if (visited[u]) continue;
+        visited[u] = true;
+
+        for (const Edge& e : adj[u]) {
+            int v = e.to;
+            int len = e.length;
+            int c = e.cost;
+
+            if (dist[v] > dist[u] + len || (dist[v] == dist[u] + len && cost[v] > cost[u] + c)) {
+                dist[v] = dist[u] + len;
+                cost[v] = cost[u] + c;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m, s, d;
+    cin >> n >> m >> s >> d;
+
+    for (int i = 0; i < m; ++i) {
+        int u, v, length, fee;
+        cin >> u >> v >> length >> fee;
+        adj[u].push_back({v, length, fee});
+        adj[v].push_back({u, length, fee});
+    }
+
+    dijkstra(s, n);
+    cout << dist[d] << " " << cost[d] << endl;
+
+    return 0;
+}
+7-4 家庭房产
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn=1e5+10;
+int father[maxn];
+//int mather[maxn];
+int h[maxn];
+int s[maxn];
+int p[maxn];
+int visit[maxn];
+struct node
+{
+	int num;
+	int k;
+	float h;
+	float s;
+}a[maxn];
+bool cmp(node a,node b)
+{
+	if(a.s==b.s)	return a.num<b.num;
+		return a.s>b.s;
+}
+void init()
+{
+	for(int i=0;i<maxn;i++)
+	{
+		father[i]=i;
+	}
+}
+int find(int x)
+{
+	while(x!=father[x])
+		x=father[x];
+	return x;
+}
+void join(int a,int b)
+{
+	int fa=find(a);
+	int fb=find(b);
+	if(fa!=fb)
+	{
+		father[fb]=fa;
+	}
+}
+
+int main()
+{
+	init();
+	int n;
+	scanf("%d",&n);
+
+	int fa,ma,k,temp;
+	for(int j=0;j<n;j++)
+	{
+		scanf("%d",&temp);
+		visit[temp]=1;
+		scanf("%d%d%d",&fa,&ma,&k);
+		if(ma!=-1)
+		{
+			visit[ma]=1;
+			join(ma,temp);
+		}
+		if(fa!=-1)
+		{
+			visit[fa]=1;
+			join(fa,temp);
+		}
+		for(int i=0;i<k;i++)
+		{
+			scanf("%d",&fa);
+			visit[fa]=1; 
+			join(temp,fa);
+			
+		}
+		scanf("%d%d",&h[temp],&s[temp]);
+	}
+	int count=0;
+	for(int i=0;i<maxn;i++)
+	{
+		temp=0;
+		if(visit[i]==1)
+		{
+			temp++;
+			a[count].s+=s[i];
+			a[count].h+=h[i];
+			a[count].num=i;
+			for(int j=i+1;j<maxn;j++)
+			{
+				if(find(i)==find(j))
+				{
+					a[count].s+=s[j];
+					a[count].h+=h[j];
+					visit[j]=0;
+					temp++;
+				}
+			
+			}
+			a[count].k=temp;
+			a[count].s=a[count].s*1.0/a[count].k;
+			a[count].h=a[count].h*1.0/a[count].k;
+			count++;
+		}
+	} 
+	printf("%d\n",count);
+	sort(a,a+count,cmp);
+	for(int i=0;i<count;i++)
+	{
+		printf("%04d %d %.3f %.3f\n",a[i].num,a[i].k,a[i].h,a[i].s);
+	}
+}
+7-5 森森美图
+#include<bits/stdc++.h>
+using namespace std;
+const int N = 1e2+5;
+const int inf = 0x3f3f3f3f;
+const double M = sqrt(2)-1;
+int n, m, vis[N][N], sx, sy, ex, ey;
+double s[N][N], dis[N][N], ans;
+int ne[8][2] = {1,0,-1,0,0,1,0,-1,1,1,-1,-1,1,-1,-1,1};
+struct node
+{
+    int x, y;
+}a, b, p;
+int cross(node a, node b, node p)
+{
+    return (b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x);
+}
+void bfs()
+{
+    memset(vis, 0, sizeof vis);
+    //memset(dis, 0x5f, sizeof dis);
+     for(int i=0; i<n; i++)
+         for(int j=0; j<m; j++)
+             dis[i][j]=inf;
+    a={sx, sy}, b={ex, ey};
+    dis[sx][sy]=s[sx][sy];
+    queue<node>Q;
+    Q.push(a);
+    while(!Q.empty())
+    {
+        int x = Q.front().x, y = Q.front().y;
+        Q.pop();
+        vis[x][y]=0;
+        for(int i=0; i<8; i++)
+        {
+            double w=0;
+            p.x=x+ne[i][0], p.y=y+ne[i][1];
+            if(p.x<0||p.x>=n||p.y<0||p.y>=m) continue;
+            if(cross(a, b, p)>0||p.x==ex&&p.y==ey)
+            {
+                w=s[p.x][p.y];
+                if(i>3) w+=(s[x][y]+s[p.x][p.y])*M;
+                if(dis[p.x][p.y]>dis[x][y]+w)
+                {
+                    dis[p.x][p.y]=dis[x][y]+w;
+                    if(!vis[p.x][p.y])
+                    {
+                        Q.push(p);
+                        vis[p.x][p.y]=1;
+                    }
+                }
+            }
+        }
+    }
+    ans+=dis[ex][ey];
+}
+int main()
+{
+    cin >> n >> m;
+    for(int i=0; i<n; i++)
+        for(int j=0; j<m; j++)
+            cin >> s[i][j];
+    cin >> sy >> sx >> ey >> ex;
+    ans = -s[sx][sy]-s[ex][ey];
+    bfs();
+    swap(ex, sx), swap(ey, sy);
+    bfs();
+    printf("%.2f",ans);
+    return 0;
+}
+
+7-6 邻接矩阵表示法创建无向图
+#include<bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<char> vertices(n);
+    vector<vector<int>> adjMatrix(n, vector<int>(n, 0));
+    
+    for (int i = 0; i < n; i++) {
+        cin >> vertices[i];
+    }
+    
+    for (int i = 0; i < m; i++) {
+        char u, v;
+        cin >> u >> v;
+        
+        int idx_u = find(vertices.begin(), vertices.end(), u) - vertices.begin();
+        int idx_v = find(vertices.begin(), vertices.end(), v) - vertices.begin();
+        
+        adjMatrix[idx_u][idx_v] = 1;
+        adjMatrix[idx_v][idx_u] = 1;
+    }
+    
+    for (int i = 0; i < n; i++) {
+        int degree = 0;
+        for (int j = 0; j < n; j++) {
+            degree += adjMatrix[i][j];
+        }
+        
+        cout << degree;
+        if (i < n - 1) cout << " ";
+    }
+    
+    return 0;
+}
+7-7 邻接表创建无向图
+#include<bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<char> vertices(n);
+    vector<vector<int>> adjMatrix(n, vector<int>(n, 0));
+    
+    for (int i = 0; i < n; i++) {
+        cin >> vertices[i];
+    }
+    
+    for (int i = 0; i < m; i++) {
+        char u, v;
+        cin >> u >> v;
+        
+        int idx_u = find(vertices.begin(), vertices.end(), u) - vertices.begin();
+        int idx_v = find(vertices.begin(), vertices.end(), v) - vertices.begin();
+        
+        adjMatrix[idx_u][idx_v] = 1;
+        adjMatrix[idx_v][idx_u] = 1;
+    }
+    
+    for (int i = 0; i < n; i++) {
+        int degree = 0;
+        for (int j = 0; j < n; j++) {
+            degree += adjMatrix[i][j];
+        }
+        
+        cout << degree;
+        if (i < n - 1) cout << " ";
+    }
+    
+    return 0;
+}
+
+7-8 单源最短路径
+#include <bits/stdc++.h>
+using namespace std;
+
+const int INF = 1e9; // 定义一个很大的数表示无穷大
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    // 使用邻接表表示图
+    vector<vector<pair<int, int>>> adj(n);
+
+    for (int i = 0; i < m; i++) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        adj[a].emplace_back(b, c); // 存储边 (a -> b) 的权重为 c
+    }
+
+    // Dijkstra 算法初始化
+    vector<int> dist(n, INF);
+    dist[0] = 0; // 源点到自身的距离为 0
+
+    // 优先队列，按照距离从小到大排列
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.emplace(0, 0); // 距离为 0，起点是 0
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top();
+        pq.pop();
+
+        if (d > dist[u]) continue; // 如果当前距离大于已找到的最短距离，跳过
+
+        for (auto [v, weight] : adj[u]) {
+            if (dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                pq.emplace(dist[v], v);
+            }
+        }
+    }
+
+    // 输出结果，源点到各个顶点的最短路径长度
+    for (int i = 1; i < n; i++) {
+        if (dist[i] != INF) {
+            cout << dist[i] << " ";
+        }
+    }
+    cout << endl;
+
+    return 0;
+}
+7-9 图深度优先遍历
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>>lsp;
+vector<bool>flag;
+
+vector<int>pq;
+
+void DFS(vector<vector<int>>&lsp,int i){
+
+
+    flag[i]=true;
+
+
+
+    pq.push_back(i);
+
+    for(auto&u:lsp[i]){
+        if(!flag[u]){
+        DFS(lsp,u);
+        }
+    }
+
+
+}
+
+
+int main(){
+
+
+    int n,m;
+    cin>>n>>m;
+
+    lsp.resize(n);
+    flag.resize(n,false);
+
+    for(int i=0;i<m;i++){
+
+        int a,b;
+        cin>>a>>b;
+
+        lsp[a].push_back(b);
+        lsp[b].push_back(a);
+
+    }
+
+    for(int i=0;i<n;i++){
+
+        sort(lsp[i].begin(),lsp[i].end());
+    }
+
+
+    for(int i=0;i<n;i++){
+       if(!flag[i]){
+        DFS(lsp,i);
+       }
+
+    }
+
+    for(auto&u:pq){
+
+        cout<<u<<" ";
+
+    }
+
+
+    return 0;
+}
+
+
+7-10 公路村村通
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Edge {
+    int u, v, cost;
+    bool operator<(const Edge& other) const {
+        return cost < other.cost;
+    }
+};
+
+vector<int> parent, rankSet;
+
+int find(int x) {
+    if (parent[x] != x)
+        parent[x] = find(parent[x]);
+    return parent[x];
+}
+
+bool unite(int x, int y) {
+    int rootX = find(x);
+    int rootY = find(y);
+    if (rootX != rootY) {
+        if (rankSet[rootX] < rankSet[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rankSet[rootX] > rankSet[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rankSet[rootX]++;
+        }
+        return true;
+    }
+    return false;
+}
+
+int kruskal(int n, vector<Edge>& edges) {
+    sort(edges.begin(), edges.end());
+    parent.resize(n + 1);
+    rankSet.resize(n + 1, 0);
+
+    for (int i = 1; i <= n; i++) {
+        parent[i] = i;
+    }
+
+    int totalCost = 0;
+    int edgesUsed = 0;
+
+    for (const auto& edge : edges) {
+        if (unite(edge.u, edge.v)) {
+            totalCost += edge.cost;
+            edgesUsed++;
+            if (edgesUsed == n - 1) break;
+        }
+    }
+
+    if (edgesUsed < n - 1) return -1;
+    return totalCost;
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<Edge> edges(m);
+
+    for (int i = 0; i < m; i++) {
+        cin >> edges[i].u >> edges[i].v >> edges[i].cost;
+    }
+
+    int result = kruskal(n, edges);
+    cout << result << endl;
+
+    return 0;
+}
+7-11 关键活动
+#include<stdio.h> 
+#include<stdlib.h> 
+#define INF 0x3f3f3f3f
+#define MAXN 103
+
+int Graph[MAXN][MAXN],Earliest[MAXN],Lastest[MAXN];
+int que[MAXN],in[MAXN],out[MAXN],max,N,M;
+
+
+int GetEarliest();
+void GetLastest();
+void PrintRoute();
+
+int main(){
+	int i,n1,n2,weight;
+	scanf("%d%d",&N,&M);
+	for(i = 1; i <= M; i++){
+		scanf("%d%d%d",&n1,&n2,&weight);
+		Graph[n1][n2] = weight;
+		out[n1]++;
+		in[n2]++;
+	}
+	if(GetEarliest()){
+		printf("%d\n",max);
+		GetLastest();
+		PrintRoute();
+	}else{
+		printf("0\n");
+	}
+	
+}
+
+int GetMin(int a,int b){
+	return (a < b) ? a : b;
+} 
+
+int GetMax(int a,int b){
+	return (a > b) ? a : b;
+}
+
+int GetEarliest(){
+	int rear = 0,front = 0,i,v;
+	for(i = 1; i <= N; i++)
+		if(!in[i]) que[rear++] = i;
+	while(front < rear){
+		v = que[front++];
+		max = GetMax(max,Earliest[v]);
+		for(i = 1; i <= N; i++){
+			if(Graph[v][i] != 0){
+				Earliest[i] = GetMax(Earliest[i], Graph[v][i] + Earliest[v]);
+				in[i]--;
+				if(!in[i]) que[rear++] = i;
+			}
+		}
+	}
+	return rear == N;
+}
+
+void GetLastest(){
+	int rear = 0,front = 0,i,v;
+	for(i = 1; i <= N; i++){
+		if(!out[i]) que[rear++] = i;
+		Lastest[i] = max;
+	}
+		
+	while(front < rear){
+		v = que[front++];
+		for(i = 1; i <= N; i++){
+			if(Graph[i][v] != 0){
+				Lastest[i] = GetMin(Lastest[i], Lastest[v] - Graph[i][v]);
+				out[i]--;
+				if(!out[i]) que[rear++] = i;
+			}
+		}
+	}
+}
+
+void PrintRoute(){
+	int i,j;
+	for(i = 1; i <= N; i++){
+		if(Earliest[i] != Lastest[i]) continue;
+		for(j = N; j >= 1; j--){
+			if(Graph[i][j] && Earliest[j] == Lastest[j] && Lastest[j] == Earliest[i] + Graph[i][j]) 
+				printf("%d->%d\n",i,j);
+		}
+	}
+}
+
+7-12 哥尼斯堡的“七桥问题”
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> graph; // 邻接表
+vector<bool> visited;
+
+// 深度优先搜索判断连通性
+void dfs(int node) {
+    visited[node] = true;
+    for (int neighbor : graph[node]) {
+        if (!visited[neighbor]) {
+            dfs(neighbor);
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    graph.resize(n + 1); // 节点编号从 1 到 n
+    vector<int> degree(n + 1, 0);
+
+    // 输入图
+    for (int i = 0; i < m; ++i) {
+        int u, v;
+        cin >> u >> v;
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+        degree[u]++;
+        degree[v]++;
+    }
+
+    // 检查连通性
+    visited.resize(n + 1, false);
+    int start_node = -1; // 选择一个度数不为 0 的起点
+    for (int i = 1; i <= n; ++i) {
+        if (degree[i] > 0) {
+            start_node = i;
+            break;
+        }
+    }
+
+    if (start_node == -1) { // 图中没有边
+        cout << 1 << endl;
+        return 0;
+    }
+
+    dfs(start_node);
+
+    // 检查是否所有度数不为 0 的节点都被访问过
+    for (int i = 1; i <= n; ++i) {
+        if (degree[i] > 0 && !visited[i]) {
+            cout << 0 << endl;
+            return 0;
+        }
+    }
+
+    // 检查所有节点的度数是否为偶数
+    for (int i = 1; i <= n; ++i) {
+        if (degree[i] % 2 != 0) {
+            cout << 0 << endl;
+            return 0;
+        }
+    }
+
+    cout << 1 << endl; // 存在欧拉回路
+    return 0;
+}
+7-13 任务调度的合理性
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<vector<int>> graph(n + 1); // 邻接表
+    vector<int> indegree(n + 1, 0);   // 入度数组
+
+    // 构建图和入度数组
+    for (int i = 1; i <= n; ++i) {
+        int k;
+        cin >> k;
+        for (int j = 0; j < k; ++j) {
+            int dependency;
+            cin >> dependency;
+            graph[dependency].push_back(i);
+            indegree[i]++;
+        }
+    }
+
+    // 拓扑排序
+    queue<int> q;
+    for (int i = 1; i <= n; ++i) {
+        if (indegree[i] == 0) { // 入度为 0 的点入队
+            q.push(i);
+        }
+    }
+
+    int count = 0; // 记录已处理的节点数
+    while (!q.empty()) {
+        int cur = q.front();
+        q.pop();
+        count++;
+
+        for (int neighbor : graph[cur]) {
+            indegree[neighbor]--;
+            if (indegree[neighbor] == 0) {
+                q.push(neighbor);
+            }
+        }
+    }
+
+    // 判断是否存在环
+    if (count == n) {
+        cout << 1 << endl; // 可行
+    } else {
+        cout << 0 << endl; // 不可行
+    }
+
+    return 0;
+}
+7-14 最短工期
+#include <bits/stdc++.h>
+using namespace std;
+
+const int MAXN = 100; // 最大里程碑数量
+const int INF = INT_MAX;
+
+struct Edge {
+    int to, time;
+};
+
+int main() {
+    int N, M; // 里程碑数量和任务总数
+    cin >> N >> M;
+
+    vector<vector<Edge>> graph(N); // 图的邻接表
+    vector<int> inDegree(N, 0);    // 入度
+    vector<int> earliest(N, 0);   // 最早完成时间
+
+    // 输入任务关系
+    for (int i = 0; i < M; ++i) {
+        int u, v, t;
+        cin >> u >> v >> t;
+        graph[u].push_back({v, t});
+        inDegree[v]++;
+    }
+
+    // 拓扑排序
+    queue<int> q;
+    for (int i = 0; i < N; ++i) {
+        if (inDegree[i] == 0) {
+            q.push(i);
+        }
+    }
+
+    int count = 0; // 记录拓扑排序中处理的节点数
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        count++;
+
+        for (const Edge& edge : graph[u]) {
+            int v = edge.to;
+            int time = edge.time;
+
+            // 更新最早完成时间
+            earliest[v] = max(earliest[v], earliest[u] + time);
+
+            // 减少入度
+            inDegree[v]--;
+            if (inDegree[v] == 0) {
+                q.push(v);
+            }
+        }
+    }
+
+    // 如果无法完成拓扑排序，说明存在环
+    if (count != N) {
+        cout << "Impossible" << endl;
+        return 0;
+    }
+
+    // 计算最早完成时间
+    int result = *max_element(earliest.begin(), earliest.end());
+    cout << result << endl;
+
+    return 0;
+}
+7-15 最短路径
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int N, E; // 顶点数和边数
+    cin >> N >> E;
+
+    vector<vector<int>> adj(N); // 邻接表表示图
+
+    // 输入边
+    for (int i = 0; i < E; ++i) {
+        int u, v;
+        cin >> u >> v;
+        if (u >= 0 && u < N && v >= 0 && v < N) { // 边界检查，防止非法输入
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+    }
+
+    int start, end; // 起点和终点
+    cin >> start >> end;
+
+    // 输入范围校验
+    if (start < 0 || start >= N || end < 0 || end >= N) {
+        cout << "There is no path between " << start << " and " << end << "." << endl;
+        return 0;
+    }
+
+    // BFS 寻找最短路径
+    vector<int> dist(N, -1); // 记录从起点到各节点的距离，-1 表示未访问
+    queue<int> q;
+    dist[start] = 0;
+    q.push(start);
+
+    while (!q.empty()) {
+        int cur = q.front();
+        q.pop();
+
+        for (int neighbor : adj[cur]) {
+            if (dist[neighbor] == -1) { // 如果未访问过
+                dist[neighbor] = dist[cur] + 1;
+                q.push(neighbor);
+            }
+        }
+    }
+
+    // 输出结果
+    if (dist[end] != -1) {
+        cout << "The length of the shortest path between " << start << " and " << end << " is " << dist[end] << "." << endl;
+    } else {
+        cout << "There is no path between " << start << " and " << end << "." << endl;
+    }
+
+    return 0;
+}
+7-16 最短路径算法(Floyd-Warshall)
+
+#include <bits/stdc++.h>
+using namespace std;
+
+const int INF = 1e9; // 无穷大表示无法到达
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<vector<int>> dist(n, vector<int>(n, INF));
+
+    // 输入邻接矩阵
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            int weight;
+            cin >> weight;
+            if (i == j) { 
+                dist[i][j] = 0; // 自己到自己的最短距离是0
+            } else if (weight > 0) { 
+                dist[i][j] = weight; // 有权值的边
+            }
+        }
+    }
+
+    // Floyd-Warshall 算法
+    for (int k = 0; k < n; ++k) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (dist[i][k] < INF && dist[k][j] < INF) { 
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+
+    // 输出结果
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (dist[i][j] == INF) {
+                cout << -1 << " "; // 无法到达
+            } else {
+                cout << dist[i][j] << " ";
+            }
+        }
+        cout << endl; // 换行
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
